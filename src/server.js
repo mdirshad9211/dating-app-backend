@@ -7,6 +7,14 @@ app.get("/", (req, res) => {
   res.send("API Running 🚀");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+function startServer() {
+  return app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+if (process.env.NODE_ENV !== "test") {
+  startServer();
+}
+
+module.exports = { app, startServer };
