@@ -1,5 +1,5 @@
 const request = require("supertest");
-const app = require("../src/server");
+const { app, startServer } = require("../src/server");
 
 describe("GET /", () => {
   it("should return 200 and correct message", async () => {
@@ -9,9 +9,10 @@ describe("GET /", () => {
   });
 });
 
-describe("Environment check", () => {
-  it("should not start server when NODE_ENV is test", () => {
-    process.env.NODE_ENV = "test";
-    expect(process.env.NODE_ENV).toBe("test");
+describe("Server startup", () => {
+  it("should start server when called", () => {
+    const server = startServer();
+    expect(server).toBeDefined();
+    server.close();
   });
 });
