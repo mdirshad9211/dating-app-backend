@@ -19,3 +19,17 @@ exports.createUser = async ({ email, passwordHash }) => {
 
   return result.rows[0];
 };
+
+
+
+exports.findUserWithPassword = async (email) => {
+  const result = await pool.query(
+    'SELECT id, email, password_hash, is_banned FROM users WHERE email = $1',
+    [email]
+  );
+
+  return result.rows[0] || null;
+};
+
+
+
