@@ -52,7 +52,7 @@ jobs:
           }'
 
       - name: Security Audit
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=low
 
       - name: Validate Docker Build
         run: docker build -t node-backend:test .
