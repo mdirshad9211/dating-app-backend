@@ -7,7 +7,7 @@ let dbAvailable = true;
 beforeAll(async () => {
   try {
     await pool.query("SELECT 1");
-  } catch (_error) {
+  } catch {
     dbAvailable = false;
     process.env.SKIP_DB_TESTS = "true";
     console.warn(
@@ -28,7 +28,7 @@ beforeEach(async () => {
 afterAll(async () => {
   try {
     await pool.end();
-  } catch (_error) {
+  } catch {
     // Ignore teardown errors when DB was not available.
   }
 });

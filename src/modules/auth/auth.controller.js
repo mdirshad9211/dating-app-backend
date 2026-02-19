@@ -51,7 +51,7 @@ exports.refresh = async (req, res) => {
     const tokens = await authService.refreshToken(refreshToken);
 
     return res.status(200).json(tokens);
-  } catch (_error) {
+  } catch {
     return res.status(401).json({ message: "Invalid refresh token" });
   }
 };
