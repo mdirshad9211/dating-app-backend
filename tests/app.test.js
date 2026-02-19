@@ -1,18 +1,10 @@
 const request = require("supertest");
-const { app, startServer } = require("../src/server");
+const app = require("../src/app");
 
-describe("GET /", () => {
+describe("GET /heath", () => {
   it("should return 200 and correct message", async () => {
-    const res = await request(app).get("/");
+    const res = await request(app).get("/heath");
     expect(res.statusCode).toBe(200);
-    expect(res.text).toBe("API Running 🚀");
-  });
-});
-
-describe("Server startup", () => {
-  it("should start server when called", () => {
-    const server = startServer();
-    expect(server).toBeDefined();
-    server.close();
+    expect(res.body).toEqual({ message: "Server is healthy" });
   });
 });
