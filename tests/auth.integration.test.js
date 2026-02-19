@@ -1,7 +1,9 @@
 const request = require("supertest");
 const app = require("../src/app");
 
-describe("Authentication Integration Tests", () => {
+const describeDb = process.env.SKIP_DB_TESTS === "true" ? describe.skip : describe;
+
+describeDb("Authentication Integration Tests", () => {
   const user = {
     email: "test@example.com",
     password: "password123",
