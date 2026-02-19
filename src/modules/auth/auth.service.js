@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const pool = require('../../infrastructure/database/pool');
 
 
+
 exports.registerUser = async ({ email, password }) => {
   if (!email || !password) {
     throw new Error('INVALID_INPUT');
@@ -105,4 +106,80 @@ exports.loginUser = async ({ email, password }) => {
     client.release();
   }
 };
+
+
+exports.refreshToken = async (refreshToken) => {
+  try {
+    const payload = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET
+    );
+
+    const { userId, sessionId } = payload;
+
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const sessionResult = await client.query(
+        `SELECT refresh_token_hash
+         FROM user_sessions
+         WHERE id = $1 AND user_id = $2 AND is_revoked = false`,
+        [sessionId, userId]
+      );
+
+      if (sessionResult.rows.length === 0) {
+        throw new Error('INVALID');
+      }
+
+      const storedHash = sessionResult.rows[0].refresh_token_hash;
+
+      const isValid = await bcrypt.compare(refreshToken, storedHash);
+
+      if (!isValid) {
+        throw new Error('INVALID');
+      }
+
+      // Generate new tokens
+      const newAccessToken = jwt.sign(
+        { userId },
+        process.env.JWT_ACCESS_SECRET,
+        { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+      );
+
+      const newRefreshToken = jwt.sign(
+        { userId, sessionId },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+      );
+
+      const newRefreshHash = await bcrypt.hash(newRefreshToken, 10);
+
+      await client.query(
+        `UPDATE user_sessions
+         SET refresh_token_hash = $1
+         WHERE id = $2`,
+        [newRefreshHash, sessionId]
+      );
+
+      await client.query('COMMIT');
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+
+  } catch (err) {
+    throw new Error('INVALID', { cause: err });
+  }
+};
+
 

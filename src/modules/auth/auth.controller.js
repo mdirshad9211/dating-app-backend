@@ -48,3 +48,19 @@ exports.login = async (req, res) => {
   }
 };
 
+
+
+exports.refresh = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    const tokens = await authService.refreshToken(refreshToken);
+
+    return res.status(200).json(tokens);
+
+  } catch (error) {
+    return res.status(401).json({ message: 'Invalid refresh token' });
+  }
+};
+
+
