@@ -1,8 +1,7 @@
 const request = require("supertest");
 const app = require("../src/app");
 
-const describeDb =
-  process.env.SKIP_DB_TESTS === "true" ? describe.skip : describe;
+const describeDb = global.SKIP_DB_TESTS === "true" ? describe.skip : describe;
 
 describeDb("Authentication Integration Tests", () => {
   const user = {
